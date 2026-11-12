@@ -37,7 +37,10 @@ jobs:
           echo "sdkmanager=$SDKM"
           test -n "$SDKM"
           yes | "$SDKM" --licenses
-          "$SDKM" "platforms;android-37" "build-tools;37.0.0"
+          "$SDKM" "platforms;android-37.0" "build-tools;37.0.0"
+          if [ -d "$SDKROOT/platforms/android-37.0" ] && [ ! -e "$SDKROOT/platforms/android-37" ]; then
+            ln -s android-37.0 "$SDKROOT/platforms/android-37"
+          fi
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
