@@ -77,7 +77,7 @@ fun BudgetScreen(
             if (Notifications.canNotify(context)) {
                 Notifications.notifyBudgetWarning(
                     context,
-                    title = "Anggaran ${Format.monthLabel(state.month)}",
+                    title = "Anggaran ${FinanceCalculations.monthLabel(state.month)}",
                     message = newWarnings.joinToString("\n"),
                 )
             }

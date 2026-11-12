@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.moneysav.app.domain.Category
 import com.moneysav.app.domain.PaymentMethods
 import com.moneysav.app.domain.TransactionType
-import com.moneysav.app.ui.components.LiquidRadii
+import com.moneysav.app.ui.theme.LiquidRadii
 import com.moneysav.app.ui.theme.LiquidSpacing
 import com.moneysav.app.util.Format
 import java.util.Calendar
