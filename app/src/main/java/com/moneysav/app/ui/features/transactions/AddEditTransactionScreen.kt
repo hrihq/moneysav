@@ -1,5 +1,7 @@
 package com.moneysav.app.ui.features.transactions
 
+import androidx.compose.animation.core.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,7 @@ import com.moneysav.app.domain.Category
 import com.moneysav.app.domain.PaymentMethods
 import com.moneysav.app.domain.TransactionType
 import com.moneysav.app.ui.components.AmountVisualTransformation
+import com.moneysav.app.ui.theme.LiquidMotion
 import com.moneysav.app.ui.theme.LiquidRadii
 import com.moneysav.app.ui.theme.LiquidSpacing
 import com.moneysav.app.util.Format
@@ -295,13 +299,27 @@ fun AddEditTransactionScreen(
 
 @Composable
 private fun TypeChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val background = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val content = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val background by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        animationSpec = LiquidMotion.snappy(),
+        label = "typeBg",
+    )
+    val content by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = LiquidMotion.snappy(),
+        label = "typeFg",
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1.06f else 1f,
+        animationSpec = LiquidMotion.bouncy(),
+        label = "typeScale",
+    )
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
         color = content,
         modifier = Modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(LiquidRadii.small))
             .background(background)
             .clickable(onClick = onClick)
@@ -311,14 +329,24 @@ private fun TypeChip(text: String, selected: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun CategoryChip(category: Category, selected: Boolean, onClick: () -> Unit) {
-    val background = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-    val content = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val background by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        animationSpec = LiquidMotion.snappy(),
+        label = "catBg",
+    )
+    val content by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = LiquidMotion.snappy(),
+        label = "catFg",
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1.07f else 1f,
+        animationSpec = LiquidMotion.bouncy(),
+        label = "catScale",
+    )
     Row(
         modifier = Modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(LiquidRadii.small))
             .background(background)
             .clickable(onClick = onClick)

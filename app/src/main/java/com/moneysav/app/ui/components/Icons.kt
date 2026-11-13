@@ -12,12 +12,14 @@ import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.HealthAndSafety
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Movie
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Receipt
 import androidx.compose.material.icons.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.ShoppingBag
 import androidx.compose.material.icons.rounded.Store
 import androidx.compose.material.icons.rounded.TrendingDown
@@ -58,4 +60,6 @@ object MoneySavIcons {
     val expense = Icons.Rounded.TrendingDown
     val check = Icons.Rounded.Check
     val category = Icons.Rounded.Category
+    val settings = Icons.Rounded.Settings
+    val palette = Icons.Rounded.Palette
 }

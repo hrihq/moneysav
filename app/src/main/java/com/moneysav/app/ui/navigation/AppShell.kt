@@ -17,7 +17,11 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -27,7 +31,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -40,9 +50,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -55,10 +67,12 @@ import com.moneysav.app.glass.rememberGlassBackdrop
 import com.moneysav.app.ui.VmFactory
 import com.moneysav.app.ui.components.AnimatedBackdrop
 import com.moneysav.app.ui.components.MoneySavIcons
+import com.moneysav.app.ui.components.ScreenBottomSheet
 import com.moneysav.app.ui.features.budget.BudgetScreen
 import com.moneysav.app.ui.features.budget.BudgetViewModel
 import com.moneysav.app.ui.features.home.HomeScreen
 import com.moneysav.app.ui.features.home.HomeViewModel
+import com.moneysav.app.ui.features.settings.SettingsScreen
 import com.moneysav.app.ui.features.statistics.StatisticsScreen
 import com.moneysav.app.ui.features.statistics.StatisticsViewModel
 import com.moneysav.app.ui.features.transactions.AddEditTransactionScreen
@@ -66,6 +80,8 @@ import com.moneysav.app.ui.features.transactions.AddEditTransactionViewModel
 import com.moneysav.app.ui.features.transactions.TransactionsScreen
 import com.moneysav.app.ui.features.transactions.TransactionsViewModel
 import com.moneysav.app.ui.theme.LiquidMotion
+import com.moneysav.app.ui.theme.ThemeState
+import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -90,10 +106,21 @@ private val BarPressedScale = 1.04f
  * sedangkan nav bar kaca diposisikan sebagai sibling di luar layer tersebut.
  */
 @Composable
-fun AppShell(repository: FinanceRepository) {
+fun AppShell(repository: FinanceRepository, themeState: ThemeState) {
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var overlay by remember { mutableStateOf<Overlay?>(null) }
+    var showSettings by remember { mutableStateOf(false) }
+    var showIntro by remember { mutableStateOf(true) }
+    // Menjaga overlay terakhir agar isi sheet tidak hilang saat animasi keluar.
+    var lastOverlay by remember { mutableStateOf<Overlay?>(null) }
+    if (overlay != null) lastOverlay = overlay
+
+    // Animasi intro saat aplikasi dibuka.
+    LaunchedEffect(Unit) {
+        delay(900)
+        showIntro = false
+    }
 
     val backdrop = rememberGlassBackdrop()
     var barPressed by remember { mutableStateOf(false) }
@@ -123,7 +150,9 @@ fun AppShell(repository: FinanceRepository) {
         }
     }
 
-    BackHandler(enabled = overlay != null) { overlay = null }
+    BackHandler(enabled = overlay != null || showSettings) {
+        if (overlay != null) overlay = null else showSettings = false
+    }
 
     val currentTab = Tab.entries.getOrElse(tab) { Tab.HOME }
     val title = when (overlay) {
@@ -141,6 +170,15 @@ fun AppShell(repository: FinanceRepository) {
                         title = title,
                         modifier = Modifier,
                         color = Color.Transparent,
+                        actions = {
+                            IconButton(onClick = { showSettings = true }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Settings,
+                                    contentDescription = "Pengaturan",
+                                    tint = MiuixTheme.colorScheme.onSurface,
+                                )
+                            }
+                        },
                     )
                 },
             ) { padding ->
@@ -256,13 +294,14 @@ fun AppShell(repository: FinanceRepository) {
             }
         }
 
-        // Overlay (tambah/ubah transaksi) berada di luar layer pengambilan.
+        // Sheet tambah/ubah transaksi: setengah layar, tarik ke bawah untuk menutup.
         AnimatedVisibility(
             visible = overlay != null,
-            enter = fadeIn(LiquidMotion.snappy()) + slideInVertically(LiquidMotion.gentle()) { it / 6 },
-            exit = fadeOut(LiquidMotion.snappy()) + slideOutVertically(LiquidMotion.snappy()) { it / 6 },
+            enter = slideInVertically(LiquidMotion.gentle()) { it } + fadeIn(LiquidMotion.snappy()),
+            exit = slideOutVertically(LiquidMotion.snappy()) { it } + fadeOut(LiquidMotion.snappy()),
         ) {
-            overlay?.let { current ->
+            val current = lastOverlay ?: Overlay.AddTransaction
+            ScreenBottomSheet(onDismiss = { overlay = null }) {
                 val addViewModel: AddEditTransactionViewModel = viewModel(
                     key = when (current) {
                         is Overlay.AddTransaction -> "add-transaction"
@@ -278,18 +317,75 @@ fun AppShell(repository: FinanceRepository) {
                         )
                     },
                 )
-                Box(Modifier.fillMaxSize()) {
-                    AppBackground()
-                    AddEditTransactionScreen(
-                        viewModel = addViewModel,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .statusBarsPadding()
-                            .navigationBarsPadding(),
-                        onDismiss = { overlay = null },
-                    )
-                }
+                AddEditTransactionScreen(
+                    viewModel = addViewModel,
+                    modifier = Modifier.fillMaxSize(),
+                    onDismiss = { overlay = null },
+                )
             }
+        }
+
+        // Pengaturan tema.
+        AnimatedVisibility(
+            visible = showSettings,
+            enter = fadeIn(LiquidMotion.snappy()) + slideInVertically(LiquidMotion.gentle()) { it / 6 },
+            exit = fadeOut(LiquidMotion.snappy()) + slideOutVertically(LiquidMotion.snappy()) { it / 6 },
+        ) {
+            Box(Modifier.fillMaxSize()) {
+                AppBackground()
+                SettingsScreen(themeState = themeState, onClose = { showSettings = false })
+            }
+        }
+
+        // Intro saat aplikasi dibuka.
+        AnimatedVisibility(
+            visible = showIntro,
+            enter = fadeIn(LiquidMotion.snappy()) + scaleIn(initialScale = 0.86f, animationSpec = LiquidMotion.gentle()),
+            exit = fadeOut(LiquidMotion.snappy()) + scaleOut(targetScale = 1.08f, animationSpec = LiquidMotion.snappy()),
+        ) {
+            IntroOverlay()
+        }
+    }
+}
+
+/** Splash singkat saat aplikasi dibuka. */
+@Composable
+private fun IntroOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MiuixTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(MiuixTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = MoneySavIcons.income,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp),
+                    tint = MiuixTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            Text(
+                text = "MoneySav",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Catat keuangan dengan tenang",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
