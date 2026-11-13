@@ -1,6 +1,6 @@
 package com.moneysav.app.ui.features.transactions
 
-import androidx.compose.animation.core.animateColorAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
