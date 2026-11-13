@@ -14,6 +14,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,6 +53,7 @@ import com.moneysav.app.glass.LocalGlassBackdrop
 import com.moneysav.app.glass.glassNavBar
 import com.moneysav.app.glass.rememberGlassBackdrop
 import com.moneysav.app.ui.VmFactory
+import com.moneysav.app.ui.components.AnimatedBackdrop
 import com.moneysav.app.ui.components.MoneySavIcons
 import com.moneysav.app.ui.features.budget.BudgetScreen
 import com.moneysav.app.ui.features.budget.BudgetViewModel
@@ -152,20 +155,22 @@ fun AppShell(repository: FinanceRepository) {
                 Box(Modifier.fillMaxSize()) {
                     // ── Layer pengambilan: latar + seluruh konten halaman ──
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop)) {
-                        AppBackground()
+                        AnimatedBackdrop(tabIndex = tab)
                         if (overlay == null) {
                             AnimatedContent(
                                 targetState = tab,
                                 transitionSpec = {
                                     val forward = targetState > initialState
-                                    val enter: (Int) -> Int = { if (forward) it / 4 else -it / 4 }
-                                    val exit: (Int) -> Int = { if (forward) -it / 4 else it / 4 }
+                                    val enter: (Int) -> Int = { if (forward) it / 3 else -it / 3 }
+                                    val exit: (Int) -> Int = { if (forward) -it / 3 else it / 3 }
                                     (
                                         fadeIn(LiquidMotion.snappy()) +
-                                            slideInHorizontally(LiquidMotion.gentle(), enter)
+                                            slideInHorizontally(LiquidMotion.gentle(), enter) +
+                                            scaleIn(initialScale = 0.94f, animationSpec = LiquidMotion.gentle())
                                         ).togetherWith(
                                         fadeOut(LiquidMotion.snappy()) +
-                                            slideOutHorizontally(LiquidMotion.snappy(), exit),
+                                            slideOutHorizontally(LiquidMotion.snappy(), exit) +
+                                            scaleOut(targetScale = 0.94f, animationSpec = LiquidMotion.snappy()),
                                     )
                                 },
                                 label = "page",

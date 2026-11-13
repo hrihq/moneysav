@@ -32,10 +32,12 @@ import com.moneysav.app.ui.components.LiquidCard
 import com.moneysav.app.ui.components.LiquidEmptyState
 import com.moneysav.app.ui.components.LiquidListItem
 import com.moneysav.app.ui.components.MoneySavIcons
+import com.moneysav.app.ui.components.SectionHeader
 import com.moneysav.app.ui.components.SectionTitle
 import com.moneysav.app.ui.features.transactions.FilterChip
 import com.moneysav.app.ui.components.staggeredEntry
 import com.moneysav.app.ui.theme.LiquidSpacing
+import com.moneysav.app.ui.theme.LocalMoneyColors
 import com.moneysav.app.util.Format
 import kotlin.math.abs
 
@@ -44,6 +46,7 @@ fun StatisticsScreen(
     state: StatisticsUiState,
     onPeriodChange: (StatPeriod) -> Unit,
 ) {
+    val money = LocalMoneyColors.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -78,14 +81,14 @@ fun StatisticsScreen(
                     Summary(
                         title = "Pemasukan",
                         value = Format.currency(state.income),
-                        color = Color(0xFF356A35),
+                        color = money.income,
                         change = state.incomeChange,
                         modifier = Modifier.weight(1f),
                     )
                     Summary(
                         title = "Pengeluaran",
                         value = Format.currency(state.expense),
-                        color = Color(0xFFC62828),
+                        color = money.expense,
                         change = state.expenseChange,
                         modifier = Modifier.weight(1f),
                     )
@@ -101,14 +104,18 @@ fun StatisticsScreen(
 
         item {
             LiquidCard {
-                SectionTitle("Pemasukan vs Pengeluaran")
-                IncomeExpenseBarChart(entries = state.bars)
+                SectionHeader(icon = MoneySavIcons.statistics, title = "Pemasukan vs Pengeluaran")
+                IncomeExpenseBarChart(
+                    entries = state.bars,
+                    incomeColor = money.income,
+                    expenseColor = money.expense,
+                )
             }
         }
 
         item {
             LiquidCard {
-                SectionTitle("Pengeluaran per Kategori")
+                SectionHeader(icon = MoneySavIcons.expense, title = "Pengeluaran per Kategori")
                 if (state.donut.isEmpty()) {
                     LiquidEmptyState(text = "Belum ada pengeluaran pada periode ini")
                 } else {
@@ -123,7 +130,7 @@ fun StatisticsScreen(
 
         item {
             LiquidCard {
-                SectionTitle("Kategori Terbesar")
+                SectionHeader(icon = MoneySavIcons.category, title = "Kategori Terbesar")
                 if (state.topCategories.isEmpty()) {
                     LiquidEmptyState(text = "Belum ada data")
                 } else {

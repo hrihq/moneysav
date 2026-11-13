@@ -35,6 +35,7 @@ import com.moneysav.app.ui.components.MoneySavIcons
 import com.moneysav.app.ui.components.staggeredEntry
 import com.moneysav.app.ui.theme.LiquidRadii
 import com.moneysav.app.ui.theme.LiquidSpacing
+import com.moneysav.app.ui.theme.LocalMoneyColors
 import com.moneysav.app.util.Format
 
 @Composable
@@ -46,6 +47,7 @@ fun TransactionsScreen(
     onMonthChange: (String?) -> Unit,
     onOpenTransaction: (Long) -> Unit,
 ) {
+    val money = LocalMoneyColors.current
     val months = remember {
         val base = state.filters.month ?: FinanceCalculations.currentMonth()
         (5 downTo 0).map { FinanceCalculations.addMonths(base, -it) }
@@ -185,7 +187,7 @@ fun TransactionsScreen(
                                         ),
                                         style = MaterialTheme.typography.titleSmall,
                                         color = if (item.transaction.type == TransactionType.INCOME) {
-                                            Color(0xFF356A35)
+                                            money.income
                                         } else {
                                             MaterialTheme.colorScheme.onSurface
                                         },

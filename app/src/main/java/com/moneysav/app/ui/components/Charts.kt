@@ -1,5 +1,6 @@
 package com.moneysav.app.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,8 +24,11 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.moneysav.app.ui.theme.LiquidMotion
 import com.moneysav.app.ui.theme.LiquidSpacing
 import kotlin.math.max
 
@@ -178,6 +182,50 @@ fun DonutChart(
 
 data class LegendItem(val label: String, val color: Color)
 
+/** Ring progres animasi (ringkasan anggaran / tabungan). */
+@Composable
+fun ProgressRing(
+    progress: Float,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    trackColor: Color = Color.Unspecified,
+    strokeWidth: Dp = 10.dp,
+    content: (@Composable () -> Unit)? = null,
+) {
+    val primary = if (color == Color.Unspecified) MaterialTheme.colorScheme.primary else color
+    val track = if (trackColor == Color.Unspecified) MaterialTheme.colorScheme.surfaceVariant else trackColor
+    val animated by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = LiquidMotion.bouncy(),
+        label = "ring",
+    )
+    Box(modifier, contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val stroke = strokeWidth.toPx()
+            val inset = stroke / 2f
+            val arcSize = Size(size.width - stroke, size.height - stroke)
+            drawArc(
+                color = track,
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                topLeft = Offset(inset, inset),
+                size = arcSize,
+                style = Stroke(width = stroke),
+            )
+            drawArc(
+                color = primary,
+                startAngle = -90f,
+                sweepAngle = 360f * animated,
+                useCenter = false,
+                topLeft = Offset(inset, inset),
+                size = arcSize,
+                style = Stroke(width = stroke, cap = StrokeCap.Round),
+            )
+        }
+        content?.invoke()
+    }
+}
 @Composable
 fun ChartLegend(items: List<LegendItem>) {
     Row(

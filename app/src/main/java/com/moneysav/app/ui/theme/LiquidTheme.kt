@@ -13,8 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +29,18 @@ import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
+
+/**
+ * Warna semantik uang yang adaptif terhadap tema.
+ *
+ * Hijau/merah gelap hanya cukup kontras di latar terang; di mode gelap
+ * teks jadi nyaris tak terlihat, jadi ganti ke varian terang.
+ */
+data class MoneyColors(val income: Color, val expense: Color)
+
+val LocalMoneyColors = staticCompositionLocalOf {
+    MoneyColors(income = Color(0xFF356A35), expense = Color(0xFFC62828))
+}
 
 /**
  * 主题层。
@@ -259,12 +273,19 @@ fun LiquidTheme(
         // 把实例当 key 永远不会失效，会导致换强调色后 Material3 配色不刷新。
         // 每次重组重算只是一次色值搬运，成本可忽略。
         val miuixScheme = MiuixTheme.colorScheme
-        MaterialTheme(
-            colorScheme = miuixScheme.toMaterialScheme(dark),
-            typography = LiquidTypography,
-            shapes = LiquidShapes,
-            content = content,
-        )
+        val moneyColors = if (dark) {
+            MoneyColors(income = Color(0xFF81C995), expense = Color(0xFFEF9A9A))
+        } else {
+            MoneyColors(income = Color(0xFF356A35), expense = Color(0xFFC62828))
+        }
+        CompositionLocalProvider(LocalMoneyColors provides moneyColors) {
+            MaterialTheme(
+                colorScheme = miuixScheme.toMaterialScheme(dark),
+                typography = LiquidTypography,
+                shapes = LiquidShapes,
+                content = content,
+            )
+        }
     }
 }
 

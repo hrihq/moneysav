@@ -57,4 +57,5 @@ object MoneySavIcons {
     val income = Icons.Rounded.TrendingUp
     val expense = Icons.Rounded.TrendingDown
     val check = Icons.Rounded.Check
+    val category = Icons.Rounded.Category
 }
