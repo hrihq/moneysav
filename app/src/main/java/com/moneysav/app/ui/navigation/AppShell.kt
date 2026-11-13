@@ -6,11 +6,14 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +22,9 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -247,28 +252,38 @@ fun AppShell(repository: FinanceRepository) {
         }
 
         // Overlay (tambah/ubah transaksi) berada di luar layer pengambilan.
-        overlay?.let { current ->
-            val addViewModel: AddEditTransactionViewModel = viewModel(
-                key = when (current) {
-                    is Overlay.AddTransaction -> "add-transaction"
-                    is Overlay.EditTransaction -> "edit-transaction-${current.id}"
-                },
-                factory = VmFactory {
-                    AddEditTransactionViewModel(
-                        repo = repository,
-                        editId = when (current) {
-                            is Overlay.AddTransaction -> null
-                            is Overlay.EditTransaction -> current.id
-                        },
-                    )
-                },
-            )
-            Box(Modifier.fillMaxSize()) {
-                AppBackground()
-                AddEditTransactionScreen(
-                    viewModel = addViewModel,
-                    onDismiss = { overlay = null },
+        AnimatedVisibility(
+            visible = overlay != null,
+            enter = fadeIn(LiquidMotion.snappy()) + slideInVertically(LiquidMotion.gentle()) { it / 6 },
+            exit = fadeOut(LiquidMotion.snappy()) + slideOutVertically(LiquidMotion.snappy()) { it / 6 },
+        ) {
+            overlay?.let { current ->
+                val addViewModel: AddEditTransactionViewModel = viewModel(
+                    key = when (current) {
+                        is Overlay.AddTransaction -> "add-transaction"
+                        is Overlay.EditTransaction -> "edit-transaction-${current.id}"
+                    },
+                    factory = VmFactory {
+                        AddEditTransactionViewModel(
+                            repo = repository,
+                            editId = when (current) {
+                                is Overlay.AddTransaction -> null
+                                is Overlay.EditTransaction -> current.id
+                            },
+                        )
+                    },
                 )
+                Box(Modifier.fillMaxSize()) {
+                    AppBackground()
+                    AddEditTransactionScreen(
+                        viewModel = addViewModel,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .statusBarsPadding()
+                            .navigationBarsPadding(),
+                        onDismiss = { overlay = null },
+                    )
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.moneysav.app.ui.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,11 +30,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.moneysav.app.ui.theme.LiquidMotion
 import com.moneysav.app.ui.theme.LiquidRadii
 import com.moneysav.app.ui.theme.LiquidSpacing
+import com.moneysav.app.util.Format
+import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -244,5 +251,57 @@ fun LiquidEmptyState(text: String, modifier: Modifier = Modifier, hint: String? 
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             )
         }
+    }
+}
+
+/** Jumlah uang yang beranimasi halus saat nilainya berubah. */
+@Composable
+fun AnimatedCurrency(
+    amount: Long,
+    style: TextStyle,
+    color: Color,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+) {
+    val animated = remember { Animatable(amount.toFloat()) }
+    LaunchedEffect(amount) {
+        if (animated.value != amount.toFloat()) {
+            animated.animateTo(amount.toFloat(), animationSpec = LiquidMotion.bouncy())
+        }
+    }
+    Text(
+        text = Format.currency(animated.value.toLong()),
+        style = style,
+        color = color,
+        fontWeight = fontWeight,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Animasi masuk berjenjang untuk item list: fade + slide naik + sedikit scale.
+ * Index di atas [maxStaggerIndex] dibatasi agar list panjang tidak semakin lambat.
+ */
+@Composable
+fun Modifier.staggeredEntry(
+    index: Int,
+    baseDelayMillis: Long = LiquidMotion.StaggerMillis,
+    initialOffsetY: Dp = 26.dp,
+    maxStaggerIndex: Int = 8,
+): Modifier {
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(index) {
+        if (progress.value == 0f) {
+            delay(index.coerceIn(0, maxStaggerIndex) * baseDelayMillis)
+        }
+        progress.animateTo(1f, animationSpec = LiquidMotion.bouncy<Float>())
+    }
+    return this.graphicsLayer {
+        val p = progress.value
+        alpha = p
+        translationY = (1f - p) * initialOffsetY.toPx()
+        val s = 0.94f + 0.06f * p
+        scaleX = s
+        scaleY = s
     }
 }

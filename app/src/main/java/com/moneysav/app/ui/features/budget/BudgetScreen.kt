@@ -45,9 +45,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moneysav.app.domain.FinanceCalculations
 import com.moneysav.app.domain.TransactionType
+import com.moneysav.app.ui.components.AmountVisualTransformation
 import com.moneysav.app.ui.components.LiquidCard
 import com.moneysav.app.ui.components.LiquidProgressBar
 import com.moneysav.app.ui.components.MoneySavIcons
+import com.moneysav.app.ui.components.staggeredEntry
 import com.moneysav.app.ui.components.SectionTitle
 import com.moneysav.app.ui.components.StatusBanner
 import com.moneysav.app.ui.features.transactions.FilterChip
@@ -172,8 +174,8 @@ fun BudgetScreen(
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(LiquidSpacing.item)) {
-                        state.budgets.forEach { item ->
-                            Column {
+                        state.budgets.forEachIndexed { index, item ->
+                            Column(modifier = Modifier.staggeredEntry(index)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -238,8 +240,8 @@ fun BudgetScreen(
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(LiquidSpacing.item)) {
-                        state.targets.forEach { item ->
-                            Column {
+                        state.targets.forEachIndexed { index, item ->
+                            Column(modifier = Modifier.staggeredEntry(index)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -341,6 +343,7 @@ private fun AddBudgetDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     label = { Text("Jumlah anggaran (Rp)") },
+                    visualTransformation = AmountVisualTransformation(),
                 )
                 if (error != null) {
                     Text(error ?: "", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -389,6 +392,7 @@ private fun AddTargetDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     label = { Text("Target (Rp)") },
+                    visualTransformation = AmountVisualTransformation(),
                 )
                 if (error != null) {
                     Text(error ?: "", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

@@ -34,6 +34,7 @@ import com.moneysav.app.ui.components.LiquidListItem
 import com.moneysav.app.ui.components.MoneySavIcons
 import com.moneysav.app.ui.components.SectionTitle
 import com.moneysav.app.ui.features.transactions.FilterChip
+import com.moneysav.app.ui.components.staggeredEntry
 import com.moneysav.app.ui.theme.LiquidSpacing
 import com.moneysav.app.util.Format
 import kotlin.math.abs
@@ -55,7 +56,7 @@ fun StatisticsScreen(
     ) {
         item {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(LiquidSpacing.inline)) {
-                items(StatPeriod.entries) { period ->
+                items(StatPeriod.entries, key = { it.name }) { period ->
                     FilterChip(
                         text = period.label,
                         selected = state.period == period,
@@ -128,9 +129,9 @@ fun StatisticsScreen(
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(LiquidSpacing.inline)) {
                         val max = state.topCategories.maxOf { it.second }.coerceAtLeast(1L)
-                        state.topCategories.forEach { (category, value) ->
+                        state.topCategories.forEachIndexed { index, (category, value) ->
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().staggeredEntry(index),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(LiquidSpacing.leading),
                             ) {

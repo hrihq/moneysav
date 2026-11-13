@@ -44,7 +44,10 @@ fun TransactionsScreen(
     onMonthChange: (String?) -> Unit,
     onOpenTransaction: (Long) -> Unit,
 ) {
-    val months = (5 downTo 0).map { FinanceCalculations.addMonths(state.filters.month ?: FinanceCalculations.currentMonth(), -it) }
+    val months = remember {
+        val base = state.filters.month ?: FinanceCalculations.currentMonth()
+        (5 downTo 0).map { FinanceCalculations.addMonths(base, -it) }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -102,7 +105,7 @@ fun TransactionsScreen(
                         onClick = { onCategoryChange(null) },
                     )
                 }
-                items(state.categories) { category ->
+                items(state.categories, key = { it.id }) { category ->
                     FilterChip(
                         text = category.name,
                         selected = state.filters.categoryId == category.id,
@@ -121,7 +124,7 @@ fun TransactionsScreen(
                         onClick = { onMonthChange(null) },
                     )
                 }
-                items(months) { month ->
+                items(months, key = { it }) { month ->
                     FilterChip(
                         text = FinanceCalculations.monthLabel(month),
                         selected = state.filters.month == month,
@@ -163,6 +166,7 @@ fun TransactionsScreen(
                     Column {
                         state.items.forEachIndexed { index, item ->
                             LiquidListItem(
+                                modifier = Modifier.staggeredEntry(index),
                                 title = item.category?.name ?: "Lainnya",
                                 subtitle = listOfNotNull(
                                     Format.dateTime(item.transaction.date),

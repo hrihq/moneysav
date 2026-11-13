@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.moneysav.app.domain.Category
 import com.moneysav.app.domain.PaymentMethods
 import com.moneysav.app.domain.TransactionType
+import com.moneysav.app.ui.components.AmountVisualTransformation
 import com.moneysav.app.ui.theme.LiquidRadii
 import com.moneysav.app.ui.theme.LiquidSpacing
 import com.moneysav.app.util.Format
@@ -55,6 +56,7 @@ import java.util.Calendar
 @Composable
 fun AddEditTransactionScreen(
     viewModel: AddEditTransactionViewModel,
+    modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
 ) {
     val categories by viewModel.categories.collectAsState()
@@ -97,7 +99,7 @@ fun AddEditTransactionScreen(
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(
@@ -135,6 +137,7 @@ fun AddEditTransactionScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             label = { Text("Jumlah (Rp)") },
+            visualTransformation = AmountVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
 

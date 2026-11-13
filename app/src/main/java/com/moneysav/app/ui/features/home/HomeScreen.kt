@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.moneysav.app.domain.FinanceCalculations
+import com.moneysav.app.ui.components.AnimatedCurrency
 import com.moneysav.app.ui.components.IncomeExpenseBarChart
 import com.moneysav.app.ui.components.LiquidCard
 import com.moneysav.app.ui.components.LiquidEmptyState
@@ -57,8 +58,8 @@ fun HomeScreen(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
-                    text = Format.currency(state.balance),
+                AnimatedCurrency(
+                    amount = state.balance,
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = if (state.balance >= 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
@@ -165,6 +166,7 @@ fun HomeScreen(
                     Column {
                         state.recent.forEachIndexed { index, item ->
                             LiquidListItem(
+                                modifier = Modifier.staggeredEntry(index),
                                 title = item.category?.name ?: "Lainnya",
                                 subtitle = listOfNotNull(
                                     Format.date(item.transaction.date),
@@ -217,8 +219,8 @@ private fun SummaryCard(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
-                    text = Format.currency(amount),
+                AnimatedCurrency(
+                    amount = amount,
                     style = MaterialTheme.typography.titleMedium,
                     color = color,
                 )
