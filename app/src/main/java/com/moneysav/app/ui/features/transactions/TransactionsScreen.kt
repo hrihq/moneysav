@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import com.moneysav.app.ui.components.LiquidCard
 import com.moneysav.app.ui.components.LiquidEmptyState
 import com.moneysav.app.ui.components.LiquidListItem
 import com.moneysav.app.ui.components.MoneySavIcons
+import com.moneysav.app.ui.components.staggeredEntry
 import com.moneysav.app.ui.theme.LiquidRadii
 import com.moneysav.app.ui.theme.LiquidSpacing
 import com.moneysav.app.util.Format
