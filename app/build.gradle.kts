@@ -20,7 +20,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 men-strip ribuan ikon tak terpakai dari material-icons-extended
+            // dan tree-shake miuix/compose -> APK jauh lebih kecil.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            // Ditandatangani debug key agar bisa diinstall langsung dari artifact.
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
